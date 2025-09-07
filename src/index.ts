@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 //importar biblioteca express
 import express from "express";
 //importar variavies de ambiente
@@ -8,12 +10,17 @@ dotenv.config();
 //criar a aplicacao epress
 const app = express();
 
+//cirar um middleware
+app.use(express.json());
+
 //incluir os controllers
-import login from "./controllers/login";
+import AuthController from "./controllers/AuthController";
+import SituationsController from "./controllers/SituationsController";
 
 //criar as rotas
 
-app.use("/", login);
+app.use("/", AuthController);
+app.use("/", SituationsController);
 
 app.listen(process.env.PORT, () => {
   console.log(
