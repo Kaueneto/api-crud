@@ -1,7 +1,7 @@
 {
   "name": "baiao1408",
   "version": "1.0.0",
-  "description": "",
+  "description": "```bash\r npm init\r ```",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
@@ -22,7 +22,15 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.3.1",
-    "concurrently": "^9.2.0",
+    "concurrently": "^9.2.1",
     "ts-node": "^10.9.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kaueneto/Programacao-web-II-.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Kaueneto/Programacao-web-II-/issues"
+  },
+  "homepage": "https://github.com/Kaueneto/Programacao-web-II-#readme"
 }
