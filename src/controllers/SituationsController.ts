@@ -10,6 +10,7 @@ const router = express.Router();
 router.get("/Situations", async (req: Request, res: Response) => {
   try {
     const situationRepository = AppDataSource.getRepository(Situations);
+
     const situations = await situationRepository.find();
 
     res.status(200).json(situations);

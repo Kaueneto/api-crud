@@ -4,6 +4,9 @@ const dialect = process.env.DB_DIALECT ?? "mysql";
 
 import { Situations } from "./entity/Situations";
 import { Users } from "./entity/Users";
+import { ProductSituation } from "./entity/ProductSituation";
+import { Products } from "./entity/products";
+import { ProductCategory } from "./entity/ProductCategory";
 
 //importar variavies de ambiente
 import dotenv from "dotenv";
@@ -20,9 +23,9 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: false,
+  synchronize: true,
   logging: true,
-  entities: [Situations, Users],
+  entities: [Situations, Users, ProductSituation, Products, ProductCategory],
   subscribers: [],
   migrations: [__dirname + "/migration/*.js"],
 });

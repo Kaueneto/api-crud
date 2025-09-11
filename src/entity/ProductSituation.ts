@@ -6,21 +6,14 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Situations } from "./Situations";
-
-@Entity("users")
-export class Users {
+import { Products } from "./products";
+@Entity("product_situations")
+export class ProductSituation {
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column()
   name!: string;
-
-  @Column({ unique: true })
-  email!: string;
-
-  @ManyToOne(() => Situations, (situation) => situation.users)
-  @JoinColumn({ name: "situationId" })
-  situation!: Situations;
 
   @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
   createdAt!: Date;
@@ -31,4 +24,5 @@ export class Users {
     onUpdate: "CURRENT_TIMESTAMP",
   })
   updatedAt!: Date;
+  products: any;
 }

@@ -16,11 +16,14 @@ app.use(express.json());
 //incluir os controllers
 import AuthController from "./controllers/AuthController";
 import SituationsController from "./controllers/SituationsController";
+import { Users } from "./entity/Users";
+import UsersController from "./controllers/UsersController";
 
 //criar as rotas
 
 app.use("/", AuthController);
 app.use("/", SituationsController);
+app.use("/", UsersController);
 
 app.listen(process.env.PORT, () => {
   console.log(
