@@ -49,6 +49,13 @@ npm i --save-dev concurrently
 npm run start:watch
 ```
 
+## Executar as migrations para criar as tabelas no banco de dados.
+
+```bash
+npx typeorm migration:run -d dist/data-source.js
+
+```
+
 ## Criar base de dados no MySQL
 
 ```sql
@@ -85,8 +92,11 @@ npx typeorm migration:create src/migration/CreateSituationsTable
 npx typeorm migration:create src/migration/CreateUsersTable
 ```
 
-## Executar as migrations para criar as tabelas no banco de dados.
-
-npx typeorm migration:run -d dist/data-source.js
-
 > > > > > > > 2c534bd (aula 03 migrations)
+
+## executar as seeds para cadastrar registro de teste nas tabelaas no banco de dados.
+
+```
+node dist/run-seeds.js
+
+```
