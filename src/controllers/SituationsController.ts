@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Situations } from "../entity/Situations";
+import { PaginationService } from "../services/PaginationService";
 //importar o arquivo com as credenciais do banco de dados
 
 //criar aplicacao express
@@ -9,11 +10,23 @@ const router = express.Router();
 // rota principal da aplicação
 router.get("/Situations", async (req: Request, res: Response) => {
   try {
+    // obter o respositorio da entidade situation
     const situationRepository = AppDataSource.getRepository(Situations);
 
-    const situations = await situationRepository.find();
+    //receber o numero de pagina e definir pagina 1 como padrao
+    const page = Number(req.query.page) || 1;
+    //definir o limite de registros por pagina
+    const limite = Number(req.query.limit) || 10;
 
-    res.status(200).json(situations);
+    const result = await PaginationService.paginate(
+      situationRepository,
+      page,
+      limite,
+      { id: "DESC" }
+    );
+
+    //retornar a resposta com os dados e infromações de paginação
+    res.status(200).json(result);
     return;
   } catch (error) {
     res.status(500).json({
