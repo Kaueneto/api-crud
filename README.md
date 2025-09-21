@@ -92,6 +92,8 @@ npx typeorm migration:create src/migration/CreateSituationsTable
 npx typeorm migration:create src/migration/CreateUsersTable
 ```
 
+npx typeorm migration:create src/migration/CreateCategoryProdutsTable
+
 > > > > > > > 2c534bd (aula 03 migrations)
 
 ## executar as seeds para cadastrar registro de teste nas tabelaas no banco de dados.
