@@ -20,7 +20,7 @@ export class PaginationService {
     const totalRecords = await repository.count();
     const lastPage = Math.ceil(totalRecords / limit);
 
-    if (page < lastPage && page > 0) {
+    if (page < lastPage && page > 1) {
       throw new Error(`Página inválida. Total de paginas: ${lastPage}`);
     }
     const offset = (page - 1) * limit;

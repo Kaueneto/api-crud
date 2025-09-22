@@ -27,6 +27,7 @@ app.use("/", SituationsController);
 app.use("/", UsersController);
 app.use("/", ProductCategoryController);
 app.use("/", ProductSituationController);
+
 app.listen(process.env.PORT, () => {
   console.log(
     `Servidor iniciado na porta ${process.env.PORT}: http://localhost:${process.env.PORT}`

@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Users } from "../entity/Users";
 import { Situations } from "../entity/Situations";
+import { PaginationService } from "../services/PaginationService";
 
 const router = express.Router();
 
@@ -9,13 +10,30 @@ const router = express.Router();
 router.get("/users", async (req: Request, res: Response) => {
   try {
     const userRepository = AppDataSource.getRepository(Users);
-    const users = await userRepository.find({ relations: ["situation"] });
 
-    res.status(200).json(users);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+  
+    // Usando o PaginationService
+    const result = await PaginationService.paginate(
+      userRepository,
+      page,
+      limit,
+      { id: "DESC" },
+      //["situation"] 
+    );
+
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ mensagem: "Erro ao listar usuários" });
   }
 });
+
+
+
+
+
+
 
 // Buscar usuário pelo ID
 router.get("/users/:id", async (req: Request, res: Response) => {

@@ -16,13 +16,13 @@ router.get("/Situations", async (req: Request, res: Response) => {
     //receber o numero de pagina e definir pagina 1 como padrao
     const page = Number(req.query.page) || 1;
     //definir o limite de registros por pagina
-    const limite = Number(req.query.limit) || 10;
+    const limit = Number(req.query.limit) || 10;
 
     const result = await PaginationService.paginate(
       situationRepository,
       page,
-      limite,
-      { id: "DESC" }
+      limit,
+      { id: "DESC" }  
     );
 
     //retornar a resposta com os dados e infromações de paginação
