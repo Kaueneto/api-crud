@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { ProductSituation } from "../entity/ProductSituation";
 import { error } from "console";
 import { Products } from "../entity/products";
+import { PaginationService } from "../services/PaginationService";
 
 const router = express.Router();
 
@@ -83,11 +84,20 @@ router.get("/product_situations/:id", async (req: Request, res: Response) => {
 //listar todos as situacoes
 router.get("/product_situations", async (req: Request, res: Response) => {
   try {
-    const productSitutationRepository =
-      AppDataSource.getRepository(ProductSituation);
-    const situations = await productSitutationRepository.find();
+    const productSitutationRepository = AppDataSource.getRepository(ProductSituation);
+    //const situations = await productSitutationRepository.find();
+    const page = Number(req.query.page) || 1;
+    //definir o limite de registros por pagina
+    const limit = Number(req.query.limit) || 10;
 
-    res.status(200).json(situations);
+    const result = await PaginationService.paginate(
+      productSitutationRepository,
+      page,
+      limit,
+      { id: "DESC" }  
+    );
+    
+    res.status(200).json(result);
   } catch (error) {
     res
       .status(500)

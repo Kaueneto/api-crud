@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { ProductCategory } from "../entity/ProductCategory";
 import { error } from "console";
 import { Products } from "../entity/products";
+import { PaginationService } from "../services/PaginationService";
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ router.delete(
 
 //cria uma categoria de produto
 
-router.post("/product-categories", async (req: Request, res: Response) => {
+router.post("/product_categories", async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
@@ -61,7 +62,7 @@ router.post("/product-categories", async (req: Request, res: Response) => {
 });
 
 //buscar categoria pelo id
-router.get("/product-categories/:id", async (req: Request, res: Response) => {
+router.get("/product_categories/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const productRepository = AppDataSource.getRepository(ProductCategory);
@@ -81,13 +82,21 @@ router.get("/product-categories/:id", async (req: Request, res: Response) => {
 });
 
 //listar todos as categorias
-router.get("/product-categories", async (req: Request, res: Response) => {
+router.get("/product_categories", async (req: Request, res: Response) => {
   try {
-    const productCategoryRepository =
-      AppDataSource.getRepository(ProductCategory);
-    const categories = await productCategoryRepository.find();
+    const productCategoryRepository = AppDataSource.getRepository(ProductCategory);
+ //   const categories = await productCategoryRepository.find();
+    const page = Number(req.query.page) || 1;
+    //definir o limite de registros por pagina
+    const limit = Number(req.query.limit) || 10;
 
-    res.status(200).json(categories);
+    const result = await PaginationService.paginate(
+      productCategoryRepository,
+      page,
+      limit,
+      { id: "DESC" }  
+    );
+    res.status(200).json(result);
   } catch (error) {
     res
       .status(500)
@@ -96,7 +105,7 @@ router.get("/product-categories", async (req: Request, res: Response) => {
 });
 
 // Atualizar a categoria do produto
-router.put("/product-categories/:id", async (req: Request, res: Response) => {
+router.put("/product_categories/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body; // nesse caso só temos "name" pra atualizar
