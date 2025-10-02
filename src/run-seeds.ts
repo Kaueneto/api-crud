@@ -3,6 +3,7 @@ import { CreateSituationSeeds } from "./seeds/CreateSituationSeeds";
 import { CreateProductSituationSeeds } from "./seeds/CreateProductSituationSeeds";
 import { CreateProductCategorySeeds } from "./seeds/CreateProductCategorySeeds";
 import { CreateUsersSeeds } from "./seeds/CreateUsersSeeds";
+import { CreateProductsSeeds } from "./seeds/CreateProductsSeeds";
 
 const runSeeds = async () => {
   console.log("conectando ao banco de dados(seeds)...");
@@ -37,6 +38,14 @@ const runSeeds = async () => {
     } catch (error) {
       console.error("Erro na seed de usuários:", error);
     }
+try {
+      await new CreateProductsSeeds().run(AppDataSource);
+      console.log("Seed de produtos executada!");
+    } catch (error) {
+      console.error("Erro na seed de produtos:", error);
+    }
+
+
   } finally {
     await AppDataSource.destroy();
     console.log("Conexão com o banco de dados encerrada.");

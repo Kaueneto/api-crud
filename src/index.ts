@@ -20,6 +20,7 @@ import { Users } from "./entity/Users";
 import UsersController from "./controllers/UsersController";
 import ProductCategoryController from "./controllers/ProductCategoryController";
 import ProductSituationController from "./controllers/ProductSituationController";
+import ProductController from "./controllers/ProductController";
 //criar as rotas
 
 app.use("/", AuthController);
@@ -27,7 +28,7 @@ app.use("/", SituationsController);
 app.use("/", UsersController);
 app.use("/", ProductCategoryController);
 app.use("/", ProductSituationController);
-
+app.use("/", ProductController);
 app.listen(process.env.PORT, () => {
   console.log(
     `Servidor iniciado na porta ${process.env.PORT}: http://localhost:${process.env.PORT}`
