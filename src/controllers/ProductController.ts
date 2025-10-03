@@ -41,25 +41,37 @@ router.delete(
 );
 
 //cria uma categoria de produto
+//router.post("/products", async (req: Request, res: Response) => {
+  //try {
+    //const { name,productCategoryId, productSituationId  } = req.body;
+//
+    //const productRepository = AppDataSource.getRepository(Products);
+//
+    //// Criando o produto diretamente com os IDs (se a entidade Products aceitar IDs nas relações)
+    //const newProduct = productRepository.create({
+      //name,
+      //productCategoryId,
+      //productSituationId
+//
+    //});
+//
+    //await productRepository.save(newProduct);
+//
+    //res.status(201).json({
+      //mensagem: "Novo produto criado com sucesso!",
+      //product: newProduct,
+    //});
+  //} catch (error) {
+    //res.status(500).json({
+      //mensagem: "Erro ao criar novo produto",
+      //error: (error as Error).message,
+    //});
+  //}
+//});
+//
 
-router.post("/products", async (req: Request, res: Response) => {
-  try {
-    const data = req.body;
-    const productRepository = AppDataSource.getRepository(Products);
-    const newProduct = productRepository.create(data);
-    await productRepository.save(newProduct);
 
-    res.status(201).json({
-      mensagem: "Novo produto criado com sucesso!",
-      category: newProduct,
-    });
-  } catch (error) {
-    res.status(500).json({
-      mensagem: "Erro ao criar novo produto",
-      error: (error as Error).message,
-    });
-  }
-});
+
 
 //buscar categoria pelo id
 router.get("/products/:id", async (req: Request, res: Response) => {
