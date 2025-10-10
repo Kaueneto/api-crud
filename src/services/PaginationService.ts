@@ -11,7 +11,7 @@ interface PaginationResult<T> {
 }
 
 export class PaginationService {
-  static async paginate<T extends ObjectLiteral>(
+  static async paginate<T extends ObjectLiteral>(   
     repository: Repository<T>,
     page: number = 1,
     limit: number = 10,
@@ -20,8 +20,8 @@ export class PaginationService {
     const totalRecords = await repository.count();
     const lastPage = Math.ceil(totalRecords / limit);
 
-    if (page < lastPage && page > 1) {
-      throw new Error(`Página inválida. Total de paginas: ${lastPage}`);
+if (page < 1 || page > lastPage) {
+        throw new Error(`Pagina invalida. Total de paginas:${lastPage}`);
     }
     const offset = (page - 1) * limit;
 
