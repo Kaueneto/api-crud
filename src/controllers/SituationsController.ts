@@ -2,6 +2,8 @@ import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Situations } from "../entity/Situations";
 import { PaginationService } from "../services/PaginationService";
+import * as yup from 'yup';
+
 //importar o arquivo com as credenciais do banco de dados
 
 //criar aplicacao express
@@ -70,6 +72,13 @@ router.put("/Situations/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     var data = req.body;
 
+    const schema = yup.object().shape({
+      nameSituation: yup.string()
+          .required("o campo nome é obrigatório!")
+          .min(3,"o campo nome deve conter no minimo 3 caracteres!")
+
+    })
+
     const situationRepository = AppDataSource.getRepository(Situations);
 
     const situations = await situationRepository.findOneBy({
@@ -94,10 +103,18 @@ router.put("/Situations/:id", async (req: Request, res: Response) => {
       situation: updatedSituation,
     });
   } catch (error) {
+
+    if(error instanceof yup.ValidationError){
+      res.status(400).json({
+        mensagem: error.errors
+
+    });
+    return;
+}
     res.status(500).json({
       mensagem: "Erro ao atualizar a situação",
     });
-    return;
+    
   }
 });
 
@@ -131,10 +148,26 @@ router.delete("/Situations/:id", async (req: Request, res: Response) => {
     return;
   }
 });
+
+
+
+
 // cria o item
 router.post("/Situations", async (req: Request, res: Response) => {
   try {
     var data = req.body;
+    
+    const schema = yup.object().shape({
+      nameSituation: yup.string()
+          .required("o campo nome da situação é obrigatório!")
+          .min(3,"o campo nome da situação deve conter no minimo 3 caracteres!")
+
+    })
+
+    await schema.validate(data, {abortEarly: false});
+
+
+
 
     const situationRepository = AppDataSource.getRepository(Situations);
     const newSituation = situationRepository.create(data);
@@ -146,6 +179,14 @@ router.post("/Situations", async (req: Request, res: Response) => {
       situation: newSituation,
     });
   } catch (error) {
+    if(error instanceof yup.ValidationError){
+      res.status(400).json({
+        mensagem: error.errors
+
+    });
+       return;
+    }
+
     res.status(500).json({
       mensagem: "Erro ao criar nova situação",
     });

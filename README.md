@@ -91,6 +91,10 @@ node dist/index.js
 npm run start:watch
 
 ```
+## validacao de formulario
+```bash
+npm i yup
+```
 
 
 

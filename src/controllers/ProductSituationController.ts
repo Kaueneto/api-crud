@@ -4,7 +4,7 @@ import { ProductSituation } from "../entity/ProductSituation";
 import { error } from "console";
 import { Products } from "../entity/products";
 import { PaginationService } from "../services/PaginationService";
-
+import * as yup from 'yup';
 const router = express.Router();
 
 /// deletar a situacao do produto pelo id
@@ -45,6 +45,18 @@ router.delete(
 router.post("/product_situations", async (req: Request, res: Response) => {
   try {
     const data = req.body;
+
+     const schema = yup.object().shape({
+      nameSituation: yup.string()
+          .required("o campo nome da situação de produto é obrigatório!")
+          .min(3,"o campo nome da situação de produto deve conter no minimo 3 caracteres!")
+
+    })
+
+3
+
+
+
     const situationRepository = AppDataSource.getRepository(ProductSituation);
     const newSituation = situationRepository.create(data);
     await situationRepository.save(newSituation);
@@ -54,6 +66,17 @@ router.post("/product_situations", async (req: Request, res: Response) => {
       situation: newSituation,
     });
   } catch (error) {
+
+    if(error instanceof yup.ValidationError){
+      res.status(400).json({
+        mensagem: error.errors
+      });
+      return;
+    }
+
+
+
+
     res.status(500).json({
       mensagem: "Erro ao criar nova situação de produto",
       error: (error as Error).message,

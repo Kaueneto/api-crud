@@ -73,7 +73,7 @@ router.post("/products", async (req: Request, res: Response) => {
       product: newProduct,
     });
   } catch (error) {
-    res.status(500).json({
+        res.status(500).json({
       mensagem: "Erro ao criar novo produto",
       error: (error as Error).message,
     });
