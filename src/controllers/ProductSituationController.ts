@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { ProductSituation } from "../entity/ProductSituation";
 import { PaginationService } from "../services/PaginationService";
 import * as yup from "yup";
+import { Not } from "typeorm";
 const router = express.Router();
 
 /// deletar a situacao do produto pelo id
@@ -27,7 +28,7 @@ router.delete(
       await productSitutationRepository.remove(situation);
 
       res.status(200).json({
-        mensagem: "Situação do produto removido com sucesso hein",
+        mensagem: "Situação do produto removido com sucesso",
       });
     } catch (error) {
       res.status(500).json({
@@ -57,6 +58,18 @@ router.post("/product_situations", async (req: Request, res: Response) => {
     await schema.validate(data, { abortEarly: false });
 
     const situationRepository = AppDataSource.getRepository(ProductSituation);
+
+    //valida duplicidade
+    const existingSituation = await situationRepository.findOne({
+      where: { name: data.name },
+    });
+    if (existingSituation) {
+      res.status(400).json({
+        mensagem: "uma situação com esse nome ja existe.",
+      });
+      return;
+    }
+
     const newSituation = situationRepository.create(data);
     await situationRepository.save(newSituation);
 
@@ -147,6 +160,21 @@ router.put("/product_situations/:id", async (req: Request, res: Response) => {
     });
     if (!situation) {
       return res.status(404).json({ mensagem: "Situação não encontrada" });
+    }
+
+    //valida duplicidade
+    const existingProductsituation = await situationRepository.findOne({
+      where: {
+        name: req.body.name,
+        id: Not(parseInt(id)),
+      },
+    });
+
+    if (existingProductsituation) {
+      res.status(400).json({
+        mensagem: "Já existe outra situação cadastrada com este nome.",
+      });
+      return;
     }
 
     if (name) situation.name = name;

@@ -4,6 +4,7 @@ import { Users } from "../entity/Users";
 import { Situations } from "../entity/Situations";
 import { PaginationService } from "../services/PaginationService";
 import * as yup from "yup";
+import { Not } from "typeorm";
 const router = express.Router();
 
 // Listar todos os usuários
@@ -59,12 +60,38 @@ router.post("/users", async (req: Request, res: Response) => {
         .string()
         .required("o nome do usuario é obrigatório!")
         .min(3, "o nome do usuario deve conter no minimo 3 caracteres!"),
+      email: yup
+        .string()
+        .email("formato de email inválido")
+        .required("o email do usuario é obrigatório!"),
     });
 
     await schema.validate(req.body, { abortEarly: false });
 
     const situationRepository = AppDataSource.getRepository(Situations);
     const userRepository = AppDataSource.getRepository(Users);
+
+    //valida duplicidade do nome
+    const existingUserName = await userRepository.findOne({
+      where: { name: req.body.name },
+    });
+    if (existingUserName) {
+      res.status(400).json({
+        mensagem: "um usuario com esse nome ja existe.",
+      });
+      return;
+    }
+
+    //valida duplicidade do email
+    const existingUserEmail = await userRepository.findOne({
+      where: { email: req.body.email },
+    });
+    if (existingUserEmail) {
+      res.status(400).json({
+        mensagem: "este email ja esta cadastrado para outro usuario.",
+      });
+      return;
+    }
 
     // Verifica se a situação existe
     const situation = await situationRepository.findOneBy({ id: situationId });
@@ -121,6 +148,20 @@ router.put("/users/:id", async (req: Request, res: Response) => {
       if (!situation)
         return res.status(400).json({ mensagem: "Situação inválida" });
       user.situation = situation;
+    }
+    //valida duplicidade
+    const existingUser = await userRepository.findOne({
+      where: {
+        name: req.body.name,
+        id: Not(parseInt(id)),
+      },
+    });
+
+    if (existingUser) {
+      res.status(400).json({
+        mensagem: "Já existe outra situação cadastrada com este nome.",
+      });
+      return;
     }
 
     if (name) user.name = name;

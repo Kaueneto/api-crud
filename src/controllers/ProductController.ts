@@ -6,7 +6,7 @@ import { PaginationService } from "../services/PaginationService";
 import { ProductSituation } from "../entity/ProductSituation";
 const router = express.Router();
 import * as yup from "yup";
-
+import { Not } from "typeorm";
 /// deletar  produto pelo id
 router.delete("/products/:id", async (req: Request, res: Response) => {
   try {
@@ -61,6 +61,17 @@ router.post("/products", async (req: Request, res: Response) => {
     const productRepository = AppDataSource.getRepository(Products);
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
     const situationRepository = AppDataSource.getRepository(ProductSituation);
+    //valida duplicidade
+    const existingProduct = await productRepository.findOne({
+      where: { name: req.body.name },
+    });
+    if (existingProduct) {
+      res.status(400).json({
+        mensagem: "um produto com esse nome ja existe.",
+      });
+
+      return;
+    }
 
     // Buscar as entidades relacionadas
     const category = await categoryRepository.findOneBy({
@@ -166,6 +177,20 @@ router.put("/products/:id", async (req: Request, res: Response) => {
     await schema.validate(req.body, { abortEarly: false });
 
     const productRepository = AppDataSource.getRepository(Products);
+    //valida duplicidade
+    const existingProduct = await productRepository.findOne({
+      where: {
+        name: req.body.name,
+        id: Not(parseInt(id)),
+      },
+    });
+
+    if (existingProduct) {
+      res.status(400).json({
+        mensagem: "Já existe outro produto cadastrado com este nome.",
+      });
+      return;
+    }
 
     const product = await productRepository.findOneBy({
       id: parseInt(id, 10),

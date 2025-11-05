@@ -1,12 +1,11 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { ProductCategory } from "../entity/ProductCategory";
-import { error } from "console";
-import { Products } from "../entity/products";
 import { PaginationService } from "../services/PaginationService";
 import * as yup from "yup";
-const router = express.Router();
+import { Not } from "typeorm";
 
+const router = express.Router();
 /// deletar a categoria do produto pelo id
 router.delete(
   "/product_categories/:id",
@@ -59,6 +58,18 @@ router.post("/product_categories", async (req: Request, res: Response) => {
     await schema.validate(data, { abortEarly: false });
 
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
+    //valida duplicidade
+    const existingCategory = await categoryRepository.findOne({
+      where: { name: req.body.name },
+    });
+    if (existingCategory) {
+      res.status(400).json({
+        mensagem: "uma categoria com esse nome ja existe.",
+      });
+
+      return;
+    }
+
     const newCategory = categoryRepository.create(data);
     await categoryRepository.save(newCategory);
 
@@ -142,6 +153,21 @@ router.put("/product_categories/:id", async (req: Request, res: Response) => {
     await schema.validate(req.body, { abortEarly: false });
 
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
+
+    //valida duplicidade
+    const existingCategory = await categoryRepository.findOne({
+      where: {
+        name: req.body.name,
+        id: Not(parseInt(id)),
+      },
+    });
+
+    if (existingCategory) {
+      res.status(400).json({
+        mensagem: "Já existe outra categoria cadastrada com este nome.",
+      });
+      return;
+    }
 
     const category = await categoryRepository.findOneBy({
       id: parseInt(id, 10),

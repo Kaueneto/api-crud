@@ -3,6 +3,7 @@ import { AppDataSource } from "../data-source";
 import { Situations } from "../entity/Situations";
 import { PaginationService } from "../services/PaginationService";
 import * as yup from "yup";
+import { Not } from "typeorm";
 
 //importar o arquivo com as credenciais do banco de dados
 
@@ -92,6 +93,22 @@ router.put("/Situations/:id", async (req: Request, res: Response) => {
       });
       return;
     }
+
+    //valida duplicidade
+    const existingSituation = await situationRepository.findOne({
+      where: {
+        nameSituation: data.nameSituation,
+        id: Not(parseInt(id)),
+      },
+    });
+
+    if (existingSituation) {
+      res.status(400).json({
+        mensagem: "Já existe outra situação cadastrada com este nome.",
+      });
+      return;
+    }
+
     //atualiza os dados
     situationRepository.merge(situations, data);
 
@@ -162,6 +179,18 @@ router.post("/Situations", async (req: Request, res: Response) => {
     await schema.validate(data, { abortEarly: false });
 
     const situationRepository = AppDataSource.getRepository(Situations);
+
+    //valida duplicidade
+    const existingSituation = await situationRepository.findOne({
+      where: { nameSituation: data.nameSituation },
+    });
+    if (existingSituation) {
+      res.status(400).json({
+        mensagem: "uma situação com esse nome ja existe.",
+      });
+      return;
+    }
+
     const newSituation = situationRepository.create(data);
 
     await situationRepository.save(newSituation);
