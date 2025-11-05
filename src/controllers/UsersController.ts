@@ -96,6 +96,17 @@ router.put("/users/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, email, situationId } = req.body;
 
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o campo nome é obrigatório!")
+        .min(
+          3,
+          "o campo nome deve conter no minimo 3 caracteres pra atualizacao!"
+        ),
+    });
+    await schema.validate(req.body, { abortEarly: false });
+
     const userRepository = AppDataSource.getRepository(Users);
     const situationRepository = AppDataSource.getRepository(Situations);
 
@@ -119,6 +130,12 @@ router.put("/users/:id", async (req: Request, res: Response) => {
 
     res.status(200).json({ mensagem: "Usuário atualizado", user: updatedUser });
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({
+        mensagem: error.errors,
+      });
+      return;
+    }
     res.status(500).json({ mensagem: "Erro ao atualizar usuário" });
   }
 });

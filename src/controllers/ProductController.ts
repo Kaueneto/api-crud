@@ -149,6 +149,21 @@ router.put("/products/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body; // nesse caso só temos "name" pra atualizar
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o nome do produto é obrigatorio.")
+        .min(3, "o nome do produto deve ter pelo menos 3 caracteres."),
+      productCategoryId: yup
+        .number()
+        .typeError("o ID da categoria deve ser um numero.")
+        .required("A categoria é obrigatória."),
+      productSituationId: yup
+        .number()
+        .typeError("o ID da situação deve ser um numero.")
+        .required("a situação é obrigatória."),
+    });
+    await schema.validate(req.body, { abortEarly: false });
 
     const productRepository = AppDataSource.getRepository(Products);
 
@@ -167,6 +182,12 @@ router.put("/products/:id", async (req: Request, res: Response) => {
       .status(200)
       .json({ mensagem: "Produto atualizado", product: updatedProduct });
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({
+        mensagem: error.errors,
+      });
+      return;
+    }
     console.error(error);
     res.status(500).json({ mensagem: "Erro ao atualizar produto" });
   }

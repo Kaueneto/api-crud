@@ -130,6 +130,17 @@ router.put("/product_categories/:id", async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name } = req.body; // nesse caso só temos "name" pra atualizar
 
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o campo nome é obrigatório!")
+        .min(
+          3,
+          "o campo nome deve conter no minimo 3 caracteres pra atualizacao!"
+        ),
+    });
+    await schema.validate(req.body, { abortEarly: false });
+
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
 
     const category = await categoryRepository.findOneBy({
@@ -147,6 +158,12 @@ router.put("/product_categories/:id", async (req: Request, res: Response) => {
       .status(200)
       .json({ mensagem: "Categoria atualizada", category: updatedCategory });
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({
+        mensagem: error.errors,
+      });
+      return;
+    }
     console.error(error);
     res.status(500).json({ mensagem: "Erro ao atualizar categoria" });
   }
