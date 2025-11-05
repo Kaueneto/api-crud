@@ -3,7 +3,7 @@ import { AppDataSource } from "../data-source";
 import { Users } from "../entity/Users";
 import { Situations } from "../entity/Situations";
 import { PaginationService } from "../services/PaginationService";
-
+import * as yup from "yup";
 const router = express.Router();
 
 // Listar todos os usuários
@@ -13,14 +13,14 @@ router.get("/users", async (req: Request, res: Response) => {
 
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 10;
-  
+
     // Usando o PaginationService
     const result = await PaginationService.paginate(
       userRepository,
       page,
       limit,
-      { id: "DESC" },
-      //["situation"] 
+      { id: "DESC" }
+      //["situation"]
     );
 
     res.status(200).json(result);
@@ -28,12 +28,6 @@ router.get("/users", async (req: Request, res: Response) => {
     res.status(500).json({ mensagem: "Erro ao listar usuários" });
   }
 });
-
-
-
-
-
-
 
 // Buscar usuário pelo ID
 router.get("/users/:id", async (req: Request, res: Response) => {
@@ -60,6 +54,15 @@ router.post("/users", async (req: Request, res: Response) => {
   try {
     const { name, email, situationId } = req.body;
 
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o nome do usuario é obrigatório!")
+        .min(3, "o nome do usuario deve conter no minimo 3 caracteres!"),
+    });
+
+    await schema.validate(req.body, { abortEarly: false });
+
     const situationRepository = AppDataSource.getRepository(Situations);
     const userRepository = AppDataSource.getRepository(Users);
 
@@ -76,6 +79,13 @@ router.post("/users", async (req: Request, res: Response) => {
       .status(201)
       .json({ mensagem: "Usuário criado com sucesso!", user: newUser });
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({
+        mensagem: error.errors,
+      });
+      return;
+    }
+
     res.status(500).json({ mensagem: "Erro ao criar usuário" });
   }
 });

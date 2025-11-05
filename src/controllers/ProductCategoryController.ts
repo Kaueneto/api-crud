@@ -4,7 +4,7 @@ import { ProductCategory } from "../entity/ProductCategory";
 import { error } from "console";
 import { Products } from "../entity/products";
 import { PaginationService } from "../services/PaginationService";
-
+import * as yup from "yup";
 const router = express.Router();
 
 /// deletar a categoria do produto pelo id
@@ -45,6 +45,19 @@ router.delete(
 router.post("/product_categories", async (req: Request, res: Response) => {
   try {
     const data = req.body;
+
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o nome da categoria do produto é obrigatorio.")
+        .min(
+          3,
+          "o nome da categoria do produto deve ter pelo menos 3 caracteres"
+        ),
+    });
+
+    await schema.validate(data, { abortEarly: false });
+
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
     const newCategory = categoryRepository.create(data);
     await categoryRepository.save(newCategory);
@@ -54,6 +67,12 @@ router.post("/product_categories", async (req: Request, res: Response) => {
       category: newCategory,
     });
   } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({
+        mensagem: error.errors,
+      });
+      return;
+    }
     res.status(500).json({
       mensagem: "Erro ao criar nova categoria de produto",
       error: (error as Error).message,
@@ -84,8 +103,9 @@ router.get("/product_categories/:id", async (req: Request, res: Response) => {
 //listar todos as categorias
 router.get("/product_categories", async (req: Request, res: Response) => {
   try {
-    const productCategoryRepository = AppDataSource.getRepository(ProductCategory);
- //   const categories = await productCategoryRepository.find();
+    const productCategoryRepository =
+      AppDataSource.getRepository(ProductCategory);
+    //   const categories = await productCategoryRepository.find();
     const page = Number(req.query.page) || 1;
     //definir o limite de registros por pagina
     const limit = Number(req.query.limit) || 10;
@@ -94,7 +114,7 @@ router.get("/product_categories", async (req: Request, res: Response) => {
       productCategoryRepository,
       page,
       limit,
-      { id: "DESC" }  
+      { id: "DESC" }
     );
     res.status(200).json(result);
   } catch (error) {

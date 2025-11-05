@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { ProductCategory } from "../entity/ProductCategory";
-import { error } from "console";
 import { Products } from "../entity/products";
 import { PaginationService } from "../services/PaginationService";
 import { ProductSituation } from "../entity/ProductSituation";
 const router = express.Router();
+import * as yup from "yup";
 
 /// deletar  produto pelo id
 router.delete("/products/:id", async (req: Request, res: Response) => {
@@ -39,7 +39,24 @@ router.delete("/products/:id", async (req: Request, res: Response) => {
 
 router.post("/products", async (req: Request, res: Response) => {
   try {
+    console.log("Dados recebidos:", req.body);
     const { name, productCategoryId, productSituationId } = req.body;
+
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o nome do produto é obrigatorio.")
+        .min(3, "o nome do produto deve ter pelo menos 3 caracteres."),
+      productCategoryId: yup
+        .number()
+        .typeError("o ID da categoria deve ser um numero.")
+        .required("A categoria é obrigatória."),
+      productSituationId: yup
+        .number()
+        .typeError("o ID da situação deve ser um numero.")
+        .required("a situação é obrigatória."),
+    });
+    await schema.validate(req.body, { abortEarly: false });
 
     const productRepository = AppDataSource.getRepository(Products);
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
@@ -73,7 +90,14 @@ router.post("/products", async (req: Request, res: Response) => {
       product: newProduct,
     });
   } catch (error) {
-        res.status(500).json({
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({
+        mensagem: error.errors,
+      });
+      return;
+    }
+
+    res.status(500).json({
       mensagem: "Erro ao criar novo produto",
       error: (error as Error).message,
     });

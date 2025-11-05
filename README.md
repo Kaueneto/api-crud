@@ -3,7 +3,7 @@
 ## Criar o arquivo package.json
 
 ```bash
-npm init 
+npm init
 ```
 
 ## Instalar o Express para gerenciar as requisições, rotas e URLs, entre outros
@@ -13,12 +13,12 @@ npm i typeorm --save
 npm i reflect-metadata --save
 npm i mysql2 --save
 ```
+
 ## Manipular variáveis de ambiente
 
 ```bash
 npm i dotenv --save
 ```
-
 
 ## Instalar os pacotes para suporte ao TypeScript
 
@@ -33,6 +33,7 @@ npm i --save-dev @types/node
 ```bash
 npm i --save-dev @types/dotenv
 ```
+
 ## Instalar a dependência para rodar processos simultâneos
 
 ```bash
@@ -44,6 +45,7 @@ npm i --save-dev concurrently
 ```bash
 npm i --save-dev ts-node
 ```
+
 ## Criar base de dados no MySQL
 
 ```bash
@@ -66,14 +68,13 @@ npx typeorm migration:create src/migration/CreateCategoryProdutsTable
 npx typeorm migration:run -d dist/data-source.js
 
 ```
+
 ## executar as seeds para cadastrar registro de teste nas tabelaas no banco de dados.
 
 ```
 node dist/run-seeds.js
 
 ```
-
-
 
 ## Compilar o arquivo TypeScript
 
@@ -91,10 +92,9 @@ node dist/index.js
 npm run start:watch
 
 ```
+
 ## validacao de formulario
+
 ```bash
 npm i yup
 ```
-
-
-

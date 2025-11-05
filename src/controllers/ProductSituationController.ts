@@ -1,10 +1,8 @@
 import express, { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { ProductSituation } from "../entity/ProductSituation";
-import { error } from "console";
-import { Products } from "../entity/products";
 import { PaginationService } from "../services/PaginationService";
-import * as yup from 'yup';
+import * as yup from "yup";
 const router = express.Router();
 
 /// deletar a situacao do produto pelo id
@@ -46,16 +44,17 @@ router.post("/product_situations", async (req: Request, res: Response) => {
   try {
     const data = req.body;
 
-     const schema = yup.object().shape({
-      nameSituation: yup.string()
-          .required("o campo nome da situação de produto é obrigatório!")
-          .min(3,"o campo nome da situação de produto deve conter no minimo 3 caracteres!")
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("o campo nome da situação de produto é obrigatório!")
+        .min(
+          3,
+          "o campo nome da situação de produto deve conter no minimo 3 caracteres!"
+        ),
+    });
 
-    })
-
-3
-
-
+    await schema.validate(data, { abortEarly: false });
 
     const situationRepository = AppDataSource.getRepository(ProductSituation);
     const newSituation = situationRepository.create(data);
@@ -66,16 +65,12 @@ router.post("/product_situations", async (req: Request, res: Response) => {
       situation: newSituation,
     });
   } catch (error) {
-
-    if(error instanceof yup.ValidationError){
+    if (error instanceof yup.ValidationError) {
       res.status(400).json({
-        mensagem: error.errors
+        mensagem: error.errors,
       });
       return;
     }
-
-
-
 
     res.status(500).json({
       mensagem: "Erro ao criar nova situação de produto",
@@ -107,7 +102,8 @@ router.get("/product_situations/:id", async (req: Request, res: Response) => {
 //listar todos as situacoes
 router.get("/product_situations", async (req: Request, res: Response) => {
   try {
-    const productSitutationRepository = AppDataSource.getRepository(ProductSituation);
+    const productSitutationRepository =
+      AppDataSource.getRepository(ProductSituation);
     //const situations = await productSitutationRepository.find();
     const page = Number(req.query.page) || 1;
     //definir o limite de registros por pagina
@@ -117,9 +113,9 @@ router.get("/product_situations", async (req: Request, res: Response) => {
       productSitutationRepository,
       page,
       limit,
-      { id: "DESC" }  
+      { id: "DESC" }
     );
-    
+
     res.status(200).json(result);
   } catch (error) {
     res
