@@ -7,22 +7,28 @@ import dotenv from "dotenv";
 //carregar as variaveis  do arquivo .env
 dotenv.config();
 
+//importar a biblioteca para permitir conexao eterna
+import cors from "cors";
+
 //criar a aplicacao epress
 const app = express();
 
 //cirar um middleware
 app.use(express.json());
+//criar o middleware para permitir a req externa
+app.use(cors());
 
 //incluir os controllers
+import TestConnectionController from "./controllers/TestConnectionController";
+
 import AuthController from "./controllers/AuthController";
 import SituationsController from "./controllers/SituationsController";
-import { Users } from "./entity/Users";
 import UsersController from "./controllers/UsersController";
 import ProductCategoryController from "./controllers/ProductCategoryController";
 import ProductSituationController from "./controllers/ProductSituationController";
 import ProductController from "./controllers/ProductController";
 //criar as rotas
-
+app.use("/", TestConnectionController);
 app.use("/", AuthController);
 app.use("/", SituationsController);
 app.use("/", UsersController);
