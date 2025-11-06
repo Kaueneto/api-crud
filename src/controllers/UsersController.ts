@@ -11,8 +11,9 @@ const router = express.Router();
 router.get("/users", async (req: Request, res: Response) => {
   try {
     const userRepository = AppDataSource.getRepository(Users);
-
+    //receber o numero de pagina e definir 1 como padrao
     const page = Number(req.query.page) || 1;
+    //define o limite de registros por pagina
     const limit = Number(req.query.limit) || 10;
 
     // Usando o PaginationService
@@ -56,14 +57,11 @@ router.post("/users", async (req: Request, res: Response) => {
     const { name, email, situationId } = req.body;
 
     const schema = yup.object().shape({
-      name: yup
-        .string()
-        .required("o nome do usuario é obrigatório!")
-        .min(3, "o nome do usuario deve conter no minimo 3 caracteres!"),
-      email: yup
-        .string()
-        .email("formato de email inválido")
-        .required("o email do usuario é obrigatório!"),
+      name: yup.string().required("o nome do usuario é obrigatório!").min(3, "o nome do usuario deve conter no minimo 3 caracteres!"),
+      email: yup.string().email("formato de email inválido").required("o email do usuario é obrigatório!"),
+      password: yup.string().required("a senha do usuario é obrigatoria!").min(6, "a senha deve conter pelo menos 6 caracteres."),
+      situation: yup.number().required("a situação do usuario é obrigatória!"),
+      
     });
 
     await schema.validate(req.body, { abortEarly: false });

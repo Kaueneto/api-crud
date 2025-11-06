@@ -98,7 +98,7 @@ router.put("/Situations/:id", async (req: Request, res: Response) => {
     const existingSituation = await situationRepository.findOne({
       where: {
         nameSituation: data.nameSituation,
-        id: Not(parseInt(id)),
+        id: Not(parseInt(id)) 
       },
     });
 

@@ -60,6 +60,11 @@ npx typeorm migration:create src/migration/CreateSituationsTable
 npx typeorm migration:create src/migration/CreateUsersTable
 
 npx typeorm migration:create src/migration/CreateCategoryProdutsTable
+
+npx typeorm migration:create src/migration/AddPasswordToUsers
+
+npx typeorm migration:create src/migration/AddSlugToProducts
+
 ```
 
 ## Executar as migrations para criar as tabelas no banco de dados.
@@ -97,4 +102,10 @@ npm run start:watch
 
 ```bash
 npm i yup
+```
+## permitir requisição externa
+
+```bash
+npm i cors
+npm install --save-dev @types/cors
 ```

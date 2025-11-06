@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { Users } from "../entity/Users";
 import { Situations } from "../entity/Situations";
+import { PassThrough } from "stream";
 
 export class CreateUsersSeeds {
   public async run(dataSource: DataSource): Promise<void> {
@@ -28,6 +29,7 @@ export class CreateUsersSeeds {
       {
         name: "Admin",
         email: "AdminKaue@gmail.com",
+        password: "123456",
         situation: situation,
       },
     ];
