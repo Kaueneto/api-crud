@@ -5,7 +5,7 @@ import {
   TableForeignKey,
 } from "typeorm";
 
-export class CreateProductsTable1758409610077 implements MigrationInterface {
+export class CreateProductsTable1757199575632 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -19,7 +19,8 @@ export class CreateProductsTable1758409610077 implements MigrationInterface {
             generationStrategy: "increment",
           },
           { name: "name", type: "varchar" },
-
+          { name: "description", type: "varchar" },
+          { name: "price", type: "decimal", precision: 10, scale: 2 },
           { name: "productSituationId", type: "int" },
           { name: "productCategoryId", type: "int" },
           {

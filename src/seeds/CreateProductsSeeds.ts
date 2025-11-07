@@ -31,21 +31,26 @@ export class CreateProductsSeeds {
     }
 
 
-    const dataProducts = [
-      {
-        name: "Produto 1",
-        situations: situationDisponivel,
-        categories: category
-      },
-      {
-        
-        name: "fulano de tal",
-        situations: descontinuadoSituation,
-        categories: category
-      }
-    ];
+  const products = [
+  productRepository.create({
+    name: "curso de programacao web",
+    slug: "curso-de-programacao-web",
+    description: "Um curso completo de programação web, com front e back.",
+    price: 199.99,
+    situations: situationDisponivel,
+    categories: category
+  }),
+  productRepository.create({
+    name: "curso de design grafico",
+    slug: "curso-de-design-grafico",
+    description: "Aprenda os fundamentos do design gráfico e ferramentas de design.",
+    price: 149.99,
+    situations: descontinuadoSituation,
+    categories: category
+  }),
+];
 
-    await productRepository.save(dataProducts);
+    await productRepository.save(products);
 
     console.log("Seed concluído com sucesso: produtos cadastrados!");
   }

@@ -109,3 +109,8 @@ npm i yup
 npm i cors
 npm install --save-dev @types/cors
 ```
+## converter o slug automaticamente antes de salvar no banco de dados
+
+```
+npm install slugify
+```

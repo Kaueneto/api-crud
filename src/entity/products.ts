@@ -5,7 +5,6 @@
     ManyToOne,
     JoinColumn,
   } from "typeorm";
-  import { Situations } from "./Situations";
   import { ProductCategory } from "./ProductCategory";
   import { ProductSituation } from "./ProductSituation";
 
@@ -16,6 +15,14 @@
 
     @Column()
     name!: string; //nome
+
+@Column({ unique: true, nullable: false })
+slug!: string; //slug
+    @Column()
+    description!: string; //descrição
+
+    @Column({ type: "decimal", precision: 10, scale: 2 })
+    price!: number; //preço
 
     @ManyToOne(
       () => ProductSituation,

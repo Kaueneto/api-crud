@@ -6,7 +6,9 @@ import { PaginationService } from "../services/PaginationService";
 import { ProductSituation } from "../entity/ProductSituation";
 const router = express.Router();
 import * as yup from "yup";
-import { Not } from "typeorm";
+import { Not, FindOptionsWhere } from "typeorm";
+import slugify from "slugify";
+
 /// deletar  produto pelo id
 router.delete("/products/:id", async (req: Request, res: Response) => {
   try {
@@ -47,27 +49,49 @@ router.post("/products", async (req: Request, res: Response) => {
         .string()
         .required("o nome do produto é obrigatorio.")
         .min(3, "o nome do produto deve ter pelo menos 3 caracteres."),
-      productCategoryId: yup
+      slug: yup
+        .string()
+        .required("o slug do produto é obrigatorio.")
+        .min(3, "o slug do produto deve ter pelo menos 3 caracteres.")
+        .max(255, "o slug do produto deve ter no máximo 255 caracteres."),
+
+       productCategoryId: yup
         .number()
         .typeError("o ID da categoria deve ser um numero.")
         .required("A categoria é obrigatória."),
-      productSituationId: yup
+       productSituationId: yup
         .number()
         .typeError("o ID da situação deve ser um numero.")
         .required("a situação é obrigatória."),
+
+       price: yup
+        .number()
+        .typeError("o preço deve ser um número.")
+        .required("o preço do produto é obrigatorio.")
+        .positive("o preço deve ser um valor positivo.")
+        .test(
+          "is-decimal",
+          "o preço deve ter no máximo duas casas decimais.",
+          (value) => /^\d+(\.\d{1,2})?$/.test(String(value))
+        )
+
+        
     });
     await schema.validate(req.body, { abortEarly: false });
+
+    //gerar slug automaticamente com base no nomne
+    req.body.slug = slugify(req.body.slug, {lower:true, strict:true});
 
     const productRepository = AppDataSource.getRepository(Products);
     const categoryRepository = AppDataSource.getRepository(ProductCategory);
     const situationRepository = AppDataSource.getRepository(ProductSituation);
     //valida duplicidade
     const existingProduct = await productRepository.findOne({
-      where: { name: req.body.name },
+  where: { slug: req.body.slug } as FindOptionsWhere<Products>
     });
     if (existingProduct) {
       res.status(400).json({
-        mensagem: "um produto com esse nome ja existe.",
+        mensagem: "um produto com esse slug ja existe!",
       });
 
       return;
@@ -159,35 +183,58 @@ router.get("/products", async (req: Request, res: Response) => {
 router.put("/products/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body; // nesse caso só temos "name" pra atualizar
-    const schema = yup.object().shape({
+    const { data } = req.body; // nesse caso só temos "name" pra atualizar
+        const schema = yup.object().shape({
       name: yup
         .string()
         .required("o nome do produto é obrigatorio.")
         .min(3, "o nome do produto deve ter pelo menos 3 caracteres."),
-      productCategoryId: yup
+      slug: yup
+        .string()
+        .required("o slug do produto é obrigatorio.")
+        .min(3, "o slug do produto deve ter pelo menos 3 caracteres.")
+        .max(255, "o slug do produto deve ter no máximo 255 caracteres."),
+
+       productCategoryId: yup
         .number()
         .typeError("o ID da categoria deve ser um numero.")
         .required("A categoria é obrigatória."),
-      productSituationId: yup
+       productSituationId: yup
         .number()
         .typeError("o ID da situação deve ser um numero.")
         .required("a situação é obrigatória."),
+
+       price: yup
+        .number()
+        .typeError("o preço deve ser um número.")
+        .required("o preço do produto é obrigatorio.")
+        .positive("o preço deve ser um valor positivo.")
+        .test(
+          "is-decimal",
+          "o preço deve ter no máximo duas casas decimais.",
+          (value) => /^\d+(\.\d{1,2})?$/.test(String(value))
+        )
+
+        
     });
     await schema.validate(req.body, { abortEarly: false });
 
+     //gerar slug automaticamente com base no nomne
+    req.body.slug = slugify(req.body.slug, {lower:true, strict:true});
+
+    
     const productRepository = AppDataSource.getRepository(Products);
     //valida duplicidade
     const existingProduct = await productRepository.findOne({
       where: {
-        name: req.body.name,
-        id: Not(parseInt(id)),
-      },
+        slug: req.body.slug,
+        id: Not(parseInt(id))
+      } as FindOptionsWhere<Products>
     });
 
     if (existingProduct) {
       res.status(400).json({
-        mensagem: "Já existe outro produto cadastrado com este nome.",
+        mensagem: "Já existe outro produto cadastrado com este slug.",
       });
       return;
     }
@@ -199,7 +246,7 @@ router.put("/products/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ mensagem: "Produto não encontrado" });
     }
 
-    if (name) product.name = name;
+    if (data) product.name = data;
 
     const updatedProduct = await productRepository.save(product);
 
