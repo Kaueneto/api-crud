@@ -1,7 +1,8 @@
 import { DataSource } from "typeorm";
 import { Users } from "../entity/Users";
 import { Situations } from "../entity/Situations";
-import { PassThrough } from "stream";
+import bcrypt from "bcryptjs";
+
 
 export class CreateUsersSeeds {
   public async run(dataSource: DataSource): Promise<void> {
@@ -28,8 +29,8 @@ export class CreateUsersSeeds {
     const dataUsers = [
       {
         name: "Admin",
+        password: await bcrypt.hash("123456", 10),
         email: "AdminKaue@gmail.com",
-        password: "123456",
         situation: situation,
       },
     ];
