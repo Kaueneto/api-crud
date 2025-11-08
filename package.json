@@ -23,6 +23,7 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.3",

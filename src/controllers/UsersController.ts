@@ -54,13 +54,13 @@ router.get("/users/:id", async (req: Request, res: Response) => {
 // Criar novo usuário
 router.post("/users", async (req: Request, res: Response) => {
   try {
-    const { name, email, situationId } = req.body;
+    const { name, email, password, situationId } = req.body;
 
     const schema = yup.object().shape({
       name: yup.string().required("o nome do usuario é obrigatório!").min(3, "o nome do usuario deve conter no minimo 3 caracteres!"),
       email: yup.string().email("formato de email inválido").required("o email do usuario é obrigatório!"),
       password: yup.string().required("a senha do usuario é obrigatoria!").min(6, "a senha deve conter pelo menos 6 caracteres."),
-      situation: yup.number().required("a situação do usuario é obrigatória!"),
+      situationId: yup.number().required("a situação do usuario é obrigatória!"),
       
     });
 
@@ -97,7 +97,7 @@ router.post("/users", async (req: Request, res: Response) => {
       return res.status(400).json({ mensagem: "Situação inválida" });
 
     // Cria o usuário
-    const newUser = userRepository.create({ name, email, situation });
+    const newUser = userRepository.create({ name, email, password, situation });
     await userRepository.save(newUser);
 
     res
@@ -119,17 +119,16 @@ router.post("/users", async (req: Request, res: Response) => {
 router.put("/users/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, email, situationId } = req.body;
+    const { name, email, password, situationId } = req.body;
 
     const schema = yup.object().shape({
-      name: yup
-        .string()
-        .required("o campo nome é obrigatório!")
-        .min(
-          3,
-          "o campo nome deve conter no minimo 3 caracteres pra atualizacao!"
-        ),
+      name: yup.string().required("o nome do usuario é obrigatório!").min(3, "o nome do usuario deve conter no minimo 3 caracteres!"),
+      email: yup.string().email("formato de email inválido").required("o email do usuario é obrigatório!"),
+      password: yup.string().required("a senha do usuario é obrigatoria!").min(6, "a senha deve conter pelo menos 6 caracteres."),
+      situationId: yup.number().required("a situação do usuario é obrigatória!"),
+      
     });
+
     await schema.validate(req.body, { abortEarly: false });
 
     const userRepository = AppDataSource.getRepository(Users);
@@ -147,17 +146,24 @@ router.put("/users/:id", async (req: Request, res: Response) => {
         return res.status(400).json({ mensagem: "Situação inválida" });
       user.situation = situation;
     }
-    //valida duplicidade
-    const existingUser = await userRepository.findOne({
-      where: {
-        name: req.body.name,
-        id: Not(parseInt(id)),
-      },
+   //valida duplicidade do nome
+    const existingUserName = await userRepository.findOne({
+      where: { name: req.body.name },
     });
-
-    if (existingUser) {
+    if (existingUserName) {
       res.status(400).json({
-        mensagem: "Já existe outra situação cadastrada com este nome.",
+        mensagem: "um usuario com esse nome ja existe.",
+      });
+      return;
+    }
+
+    //valida duplicidade do email
+    const existingUserEmail = await userRepository.findOne({
+      where: { email: req.body.email },
+    });
+    if (existingUserEmail) {
+      res.status(400).json({
+        mensagem: "este email ja esta cadastrado para outro usuario.",
       });
       return;
     }

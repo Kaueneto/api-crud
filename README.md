@@ -1,4 +1,18 @@
-# Guia de Instalação e Configuração
+## API RESTful desenvolvida em **Node.js + TypeScript + Express + TypeORM**, conectada ao **MySQL**
+
+## Funcionalidades
+
+- CRUD completo para gerenciamento de entidades (usuários, produtos e situações)  
+- Autenticação de usuários com **JWT (JSON Web Token)**  
+- Criptografia de senhas utilizando **bcryptjs**  
+- Validação de dados e formulários com **Yup**  
+- Envio de e-mails para recuperação de senha com **Nodemailer**  
+- Conversão automática de nomes em **slugs** para URLs amigáveis  
+- Criação e atualização do banco de dados via **migrations**  
+- Inserção de dados iniciais através de **seeds**
+
+
+# Guia:
 
 ## Criar o arquivo package.json
 
@@ -87,7 +101,7 @@ node dist/run-seeds.js
 npx tsc
 ```
 
-## Executar o arquivo gerado com Node.js
+### Executar o arquivo gerado com Node.js
 
 ```bash
 node dist/index.js
@@ -98,19 +112,23 @@ npm run start:watch
 
 ```
 
-## validacao de formulario
+### validacao de formulario
 
 ```bash
 npm i yup
 ```
-## permitir requisição externa
+### permitir requisição externa
 
 ```bash
 npm i cors
 npm install --save-dev @types/cors
 ```
-## converter o slug automaticamente antes de salvar no banco de dados
+### converter o slug automaticamente antes de salvar no banco de dados
 
 ```
 npm install slugify
+```
+### instalar o bcryptjs.
+```
+npm install --save-dev @types/bcryptjs
 ```
