@@ -131,4 +131,12 @@ npm install slugify
 ### instalar o bcryptjs.
 ```
 npm install --save-dev @types/bcryptjs
+
+
+```
+### instalar dependecia jwt pra manipular token de autenticacao.
+```
+npm install jsonwebtoken
+```
+npm i --save-dev @types/jsonwebtoken
 ```
