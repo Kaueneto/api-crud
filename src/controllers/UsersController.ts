@@ -7,9 +7,11 @@ import * as yup from "yup";
 import { Not } from "typeorm";
 const router = express.Router();
 import bcrypt from "bcryptjs";
+//importar o middleware de autenticacao
+import { verifyToken } from "../Middleware/AuthMiddleware";
 
 // Listar todos os usuários
-router.get("/users", async (req: Request, res: Response) => {
+router.get("/users",verifyToken, async (req: Request, res: Response) => {
   try {
     const userRepository = AppDataSource.getRepository(Users);
     //receber o numero de pagina e definir 1 como padrao
@@ -134,7 +136,7 @@ router.post("/users", async (req: Request, res: Response) => {
 
 
 // Atualizar usuário
-router.put("/users/:id", async (req: Request, res: Response) => {
+router.put("/users/:id",verifyToken, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name, email, password, situationId } = req.body;
