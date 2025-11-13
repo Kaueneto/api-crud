@@ -4,10 +4,11 @@ import { AuthService } from "../services/AuthService";
 //criar aplicacao express
 //importar a biblioteca yup para validacao
 import * as yup from "yup";
-
+import nodemailer from "nodemailer";
 import { AppDataSource } from "../data-source";
 import { Users } from "../entity/Users";
 import crypto from "crypto";
+import { url } from "inspector";
 
 const router = express.Router();
 
@@ -51,57 +52,106 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 router.post("/recover-password", async (req: Request, res: Response) => {
-
-  try{
-   var data = req.body;
+  try {
+    var data = req.body;
 
     const schema = yup.object().shape({
-      urlRecoverPassword: yup
-        .string()
-        .required("a url é obrigatoria!"),
+      urlRecoverPassword: yup.string().required("a url é obrigatoria!"),
       email: yup
         .string()
         .email("Formato de e-mail inválido")
         .required("O e-mail do usuário é obrigatório!"),
-
     });
 
     await schema.validate(data, { abortEarly: false });
-    //criar uma instancia no repositorio do user
+
     const userRepository = AppDataSource.getRepository(Users);
-    //recuperar o registro do banco de dados com o valor da coluna email
+
     const user = await userRepository.findOneBy({
-      email: data.email
-    })
-    if (!user) {
-      res.status(404).json({
-        mensagem: "Usuário não encontrado"
-      });
-      return;
-    }
-    //gerar um token seguro de 64 caracteres
-    user.recoverPassword = crypto.randomBytes(32).toString("hex");
-
-    await userRepository.save(user);
-
-    res.status(200).json({
-      mensagem: "link para recuperação de senha gerado com sucesso!",
-      urlRecoverPassword: `${data.urlRecoverPassword}?email=${data.email}&key=${user.recoverPassword}`,
-      key: user.recoverPassword,
+      email: data.email,
     });
 
-
- } catch (error) {
-    if (error instanceof yup.ValidationError) {
-      res.status(400).json({
-        mensagem: error.errors,
-      });
+    if (!user) {
+      res.status(404).json({ mensagem: "Usuário não encontrado" });
       return;
     }
+
+    // gerar token
+    user.recoverPassword = crypto.randomBytes(32).toString("hex");
+    await userRepository.save(user);
+
+    //CONFIGURAR E-MAIL
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+   var message_content = {
+  from: process.env.EMAIL_FROM,
+  to: data.email,
+  subject: "Recuperar Senha",
+  text: `Prezado(a) ${user.name},
+Informamos que a sua solicitação de alteração de senha foi recebida com sucesso.
+Clique ou copie o link para criar uma nova senha em nosso sistema:
+${data.urlRecoverPassword}?email=${data.email}&key=${user.recoverPassword}
+Esta mensagem foi enviada a você pela empresa ${process.env.APP}.
+Você está recebendo porque está cadastrado no banco de dados da empresa ${process.env.APP}.
+Nenhum e-mail enviado pela empresa ${process.env.APP} tem arquivos anexados ou solicita
+o preenchimento de senhas ou informações cadastrais.
+`,
+
+  // Conteúdo em HTML
+  html: `
+    <p>Prezado(a) <strong>${user.name}</strong>,</p>
+
+    <p>Informamos que a sua solicitação de alteração de senha foi recebida com sucesso.</p>
+
+    <p>Clique no link para criar uma nova senha em nosso sistema:</p>
+    <p>
+      <a href="${data.urlRecoverPassword}?email=${data.email}&key=${user.recoverPassword}">
+        ${data.urlRecoverPassword}?email=${data.email}&key=${user.recoverPassword}
+      </a>
+    </p>
+
+    <br>
+
+    <p>Esta mensagem foi enviada a você pela empresa <strong>${process.env.APP}</strong>.</p>
+    <p>
+      Você está recebendo porque está cadastrado no banco de dados da empresa <strong>${process.env.APP}</strong>.
+      Nenhum e-mail enviado pela empresa <strong>${process.env.APP}</strong> tem arquivos anexados ou solicita
+      o preenchimento de senhas e informações cadastrais.
+    </p>
+  `,
+};
+
+    transporter.sendMail(message_content, function (err) {
+      if (err) {
+        console.log("Erro ao enviar email: ", err);
+        res.status(500).json({
+          mensagem: `E-mail nao enviado, tente novamente ou contate ${process.env.EMAIL_USER}.`,
+        });
+        return;
+      }
+
+      res.status(200).json({
+        mensagem: "E-mail enviado com sucesso! Verifique sua caixa de entrada.",
+        urlRecoverPassword: `${data.urlRecoverPassword}?email=${data.email}&key=${user.recoverPassword}`,
+      });
+    });
+  } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({ mensagem: error.errors });
+      return;
+    }
+
     res.status(500).json({ mensagem: "Erro ao editar senha do usuário" });
   }
 });
-
 
 
 

@@ -13,7 +13,7 @@ export class AddRecoverPasswordToUsers1763063630745 implements MigrationInterfac
                 //ajustar a ordem da coluna
                 await queryRunner.query(`ALTER TABLE users MODIFY COLUMN recoverPassword VARCHAR(255) after password`);
                 
-    }
+    } 
 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.dropColumn("users", "recoverPassword");

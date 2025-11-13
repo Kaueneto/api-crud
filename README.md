@@ -141,3 +141,7 @@ npm install jsonwebtoken
 ```
 npm i --save-dev @types/jsonwebtoken
 ```
+### instalado nodemailer.
+```
+npm install --save-dev @types/nodemailer
+```
