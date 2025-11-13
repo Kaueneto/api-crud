@@ -78,6 +78,7 @@ npx typeorm migration:create src/migration/CreateCategoryProdutsTable
 npx typeorm migration:create src/migration/AddPasswordToUsers
 
 npx typeorm migration:create src/migration/AddSlugToProducts
+npx typeorm migration:create src/migration/AddRecoverPasswordToUsers
 
 ```
 
