@@ -110,7 +110,7 @@ router.post("/users", async (req: Request, res: Response) => {
 
     // criptografar senha antes de salvar
   
-    data.password = await bcrypt.hash(data.password, 10);
+    //data.password = await bcrypt.hash(data.password, 10);
 
     // cria o usuário (associando a situação)
     const newUser = userRepository.create({
@@ -235,7 +235,7 @@ try {
     }
 
     //criptografar a senha antes de salvar
-     data.password = await bcrypt.hash(data.password, 10);
+    // data.password = await bcrypt.hash(data.password, 10);
      //atualizar dados do user
      userRepository.merge( user, data );
      //salvar os dados atualizados no banco

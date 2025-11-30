@@ -133,7 +133,7 @@ o preenchimento de senhas ou informações cadastrais.
       if (err) {
         console.log("Erro ao enviar email: ", err);
         res.status(500).json({
-          mensagem: `E-mail nao enviado, tente novamente ou contate ${process.env.EMAIL_USER}.`,
+          mensagem: `E-mail nao enviado, tente novamente ou contate ${process.env.EMAIL_ADM}.`,
         });
         return;
       }
@@ -153,6 +153,102 @@ o preenchimento de senhas ou informações cadastrais.
   }
 });
 
+router.post("/validate-recover-password", async (req: Request, res: Response) => {
+  try {
+    const data = req.body;
 
+    const schema = yup.object().shape({
+      recoverPassword: yup.string().required("A chave é obrigatória!"),
+      email: yup
+        .string()
+        .email("Formato de e-mail inválido")
+        .required("O e-mail do usuário é obrigatório!"),
+    });
+
+    await schema.validate(data, { abortEarly: false });
+
+    const userRepository = AppDataSource.getRepository(Users);
+
+    const user = await userRepository.findOneBy({
+      email: data.email,
+      recoverPassword: data.recoverPassword,
+    });
+
+    if (!user) {
+      res.status(404).json({ mensagem: "A chave de recuperação é inválida" });
+      return;
+    }
+
+    res.status(200).json({
+      message: "A chave pra recuperar senha é válida!",
+    });
+
+  } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({ mensagem: error.errors });
+      return;
+    }
+
+    res.status(500).json({ mensagem: "Erro interno ao validar a chave" });
+  }
+});
+
+
+
+router.put("/update-password", async (req: Request, res: Response) => {
+  try {
+
+const data = req.body;
+
+    const schema = yup.object().shape({
+      recoverPassword: yup.string().required("A chave é obrigatória!"),
+      email: yup
+        .string()
+        .email("Formato de e-mail inválido")
+        .required("O e-mail do usuário é obrigatório!"),
+       password: yup
+         .string()
+         .required("A senha do usuário é obrigatória!")
+         .min(6, "A senha deve conter pelo menos 6 caracteres."),
+    });
+
+    await schema.validate(data, { abortEarly: false });
+
+    const userRepository = AppDataSource.getRepository(Users);
+
+    const user = await userRepository.findOneBy({
+      email: data.email,
+      recoverPassword: data.recoverPassword,
+    });
+
+    if (!user) {
+      res.status(404).json({ mensagem: "A chave de recuperação é inválida" });
+      return;
+    }
+
+//atribuir valor nulo para a coluna/campo recoverPassword
+    data.recoverPassowrd = null;
+
+
+    //autalizar os dados do usuario
+
+    userRepository.merge(user, data);
+    //salvar as alteracoes no banco
+    await userRepository.save(user);
+
+    res.status(200).json({
+      mensagem: "senha atualizada com sucesso!",
+    })
+
+
+} catch (error) {
+    if (error instanceof yup.ValidationError) {
+      res.status(400).json({ mensagem: error.errors });
+      return;
+    }
+
+    res.status(500).json({ mensagem: "Erro interno ao validar a chave" });
+  }
+});
 
 export default router;
