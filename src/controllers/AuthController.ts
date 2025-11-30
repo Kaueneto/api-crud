@@ -9,6 +9,9 @@ import { AppDataSource } from "../data-source";
 import { Users } from "../entity/Users";
 import crypto from "crypto";
 import { url } from "inspector";
+import { verifyToken } from "../Middleware/AuthMiddleware";
+
+import { Situations } from "../entity/Situations";
 
 const router = express.Router();
 
@@ -50,6 +53,95 @@ router.post("/", async (req: Request, res: Response) => {
 
   }
 });
+
+//rota de validacao token
+router.get("/validate-token", verifyToken, async (req: Request, res: Response) => {
+ res.status(200).json({
+      message: "Token válido OK!",
+      userId: (req as any).userId,
+    });
+
+});
+
+router.post("/new-user", async (req: Request, res: Response) => {
+  try {
+    var data = req.body;
+
+    const schema = yup.object().shape({
+      name: yup
+        .string()
+        .required("O nome do usuário é obrigatório!")
+        .min(3, "O nome do usuário deve conter no mínimo 3 caracteres!"),
+      email: yup
+        .string()
+        .email("Formato de e-mail inválido")
+        .required("O e-mail do usuário é obrigatório!"),
+      password: yup
+        .string()
+        .required("A senha do usuário é obrigatória!")
+        .min(6, "A senha deve conter pelo menos 6 caracteres."),
+      situationId: yup
+        .number()
+        .required("A situação do usuário é obrigatória!"),
+    });
+
+    await schema.validate(data, { abortEarly: false });
+
+    const situationRepository = AppDataSource.getRepository(Situations);
+    const userRepository = AppDataSource.getRepository(Users);
+
+    // valida duplicidade do nome
+    const existingUserName = await userRepository.findOne({
+      where: { name: data.name },
+    });
+    if (existingUserName) {
+      return res.status(400).json({
+        mensagem: "Um usuário com esse nome já existe.",
+      });
+    }
+
+    // valida duplicidade do email
+    const existingUserEmail = await userRepository.findOne({
+      where: { email: data.email },
+    });
+    if (existingUserEmail) {
+      return res.status(400).json({
+        mensagem: "Este e-mail já está cadastrado para outro usuário.",
+      });
+    }
+
+    // verifica se a situação existe
+    const situation = await situationRepository.findOneBy({ id: data.situationId });
+    if (!situation) {
+      return res.status(400).json({ mensagem: "Situação inválida." });
+    }
+
+    // criptografar senha antes de salvar
+  
+    //data.password = await bcrypt.hash(data.password, 10);
+
+    // cria o usuário (associando a situação)
+    const newUser = userRepository.create({
+      ...data,
+      situation,
+    });
+
+    await userRepository.save(newUser);
+
+    return res
+      .status(201)
+      .json({ mensagem: "Usuário criado com sucesso!", user: newUser });
+  } catch (error) {
+    if (error instanceof yup.ValidationError) {
+      return res.status(400).json({
+        mensagem: error.errors,
+      });
+    }
+
+    return res.status(500).json({ mensagem: "Erro ao criar usuário" });
+  }
+});
+
 
 router.post("/recover-password", async (req: Request, res: Response) => {
   try {
